@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}SAMARIA - {{ product.nombre }} ({{ product.marca }}){% endblock %}
+
+{% block content %}
+<div class="product-detail-page container">
+    <nav class="breadcrumb">
+        <a href="{{ url_for('public.index') }}">Catálogo</a> &gt;
+        <span>{{ product.nombre }}</span>
+    </nav>
+
+    <div class="product-detail-grid">
+        <!-- Galería de Imágenes -->
+        <div class="detail-gallery">
+            <div class="main-image-frame">
+                <img src="{{ product.imagen_principal|img_url(product.imagen_origen) }}" 
+                     alt="{{ product.nombre }}" 
+                     id="detailMainImg" 
+                     class="detail-main-img">
+            </div>
+            {% if product.imagenes|length > 1 %}
+                <div class="thumbnails-row">
+                    {% for img in product.imagenes %}
+                        <div class="thumbnail-item {% if loop.first %}active{% endif %}" onclick="changeMainImage('{{ img|img_url }}', this)">
+                            <img src="{{ img|img_url }}" alt="Vista {{ loop.index }}">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Información -->
+        <div class="detail-info">
+            <div class="detail-brand">{{ product.marca }}</div>
+            <h1 class="detail-title">{{ product.nombre }}</h1>
+            <div class="detail-price">{{ product.precio|currency }}</div>
+
+            <div class="detail-badges">
+                {% if product.disponible == 1 %}
+                    <span class="availability-badge in-stock"><i class="fa-solid fa-check"></i> Disponible para pedido</span>
+                {% else %}
+                    <span class="availability-badge out-of-stock"><i class="fa-solid fa-xmark"></i> Agotado</span>
+                {% endif %}
+
+                {% for cat in product.categorias %}
+                    <span class="cat-pill-badge">{{ cat.nombre }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="detail-description">
+                <h3>Descripción</h3>
+                <p>{{ product.descripcion or 'Calzado fabricado con materiales de alta calidad, diseñado para brindar comodidad y elegancia en cada pisada.' }}</p>
+            </div>
+
+            <div class="detail-actions">
+                <a href="https://wa.me/?text=Hola%20SAMARIA,%20estoy%20interesado%20en%20el%20calzado%20{{ product.nombre|urlencode }}%20de%20marca%20{{ product.marca|urlencode }}" 
+                   target="_blank" 
+                   class="btn btn-whatsapp">
+                    <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp
+                </a>
+                <a href="{{ url_for('public.index') }}" class="btn btn-outline">Volver al Catálogo</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeMainImage(url, el) {
+    document.getElementById('detailMainImg').src = url;
+    document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+    el.classList.add('active');
+}
+</script>
+{% endblock %}

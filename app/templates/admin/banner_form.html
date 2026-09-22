@@ -1,0 +1,138 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}
+    {% if banner %}Editar Banner{% else %}Nuevo Banner{% endif %} - SAMARIA
+{% endblock %}
+
+{% block content %}
+<div class="product-form-container">
+    
+    <div class="form-header">
+        <a href="{{ url_for('admin.banners_list') }}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Volver a la lista de banners
+        </a>
+        <h1 class="page-title">
+            {% if banner %}Editar Banner: <span class="text-gold">{{ banner.titulo }}</span>{% else %}Crear Nuevo Banner{% endif %}
+        </h1>
+        <p class="page-subtitle">Configura los textos, el botón de acción y la imagen (local o desde Google Drive).</p>
+    </div>
+
+    <div class="admin-card" style="max-width: 800px;">
+        <form action="{% if banner %}{{ url_for('admin.banner_edit', banner_id=banner.id) }}{% else %}{{ url_for('admin.banner_new') }}{% endif %}" 
+              method="POST" 
+              enctype="multipart/form-data">
+
+            <div class="form-section-title">Contenido del Banner</div>
+
+            <div class="form-group">
+                <label for="titulo" class="form-label required">Título Principal del Banner</label>
+                <input type="text" 
+                       id="titulo" 
+                       name="titulo" 
+                       class="form-control" 
+                       value="{{ banner.titulo if banner else '' }}" 
+                       placeholder="Ej: NUEVA COLECCIÓN 2026 / DESCUENTOS DE TEMPORADA" 
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="subtitulo" class="form-label">Subtítulo o Mensaje Secundario</label>
+                <input type="text" 
+                       id="subtitulo" 
+                       name="subtitulo" 
+                       class="form-control" 
+                       value="{{ banner.subtitulo if banner else '' }}" 
+                       placeholder="Ej: Descubre la elegancia y confort que tus pasos merecen.">
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="texto_boton" class="form-label">Texto del Botón</label>
+                    <input type="text" 
+                           id="texto_boton" 
+                           name="texto_boton" 
+                           class="form-control" 
+                           value="{{ banner.texto_boton if banner else 'Explorar Colección' }}" 
+                           placeholder="Ej: Explorar Colección, Ver Promociones...">
+                </div>
+
+                <div class="form-group">
+                    <label for="enlace_url" class="form-label">Enlace de Destino</label>
+                    <input type="text" 
+                           id="enlace_url" 
+                           name="enlace_url" 
+                           class="form-control" 
+                           value="{{ banner.enlace_url if banner else '#catalogo-seccion' }}" 
+                           placeholder="Ej: /categoria/nuevo, /categoria/promo, #catalogo-seccion">
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="orden" class="form-label">Orden de Visualización</label>
+                    <input type="number" 
+                           id="orden" 
+                           name="orden" 
+                           class="form-control" 
+                           value="{{ banner.orden if banner else 0 }}" 
+                           min="0">
+                </div>
+
+                <div class="form-group" style="display:flex; align-items:flex-end;">
+                    <label class="switch-toggle-label" style="margin-bottom:10px;">
+                        <input type="checkbox" name="activo" value="1" {% if not banner or banner.activo == 1 %}checked{% endif %}>
+                        <span class="switch-text">Banner activo y visible en el carrusel</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-section-title mt-4">Imagen del Banner</div>
+
+            <!-- Opción A: Google Drive -->
+            <div class="form-group" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 18px; border-radius: 8px;">
+                <label for="drive_link" class="form-label" style="color: #166534; font-weight:700;">
+                    <i class="fa-brands fa-google-drive"></i> Opción A: Enlace público de Google Drive
+                </label>
+                <input type="text" 
+                       id="drive_link" 
+                       name="drive_link" 
+                       class="form-control" 
+                       value="{% if banner and banner.origen == 'drive' %}{{ banner.imagen_url }}{% endif %}"
+                       placeholder="Pega aquí el enlace de compartir de Google Drive (ej: https://drive.google.com/file/d/.../view)">
+                <small style="color: #15803d; display:block; margin-top:6px;">
+                    Asegúrate de que en Google Drive el archivo tenga permiso: <strong>"Cualquier persona con el enlace puede ver"</strong>.
+                </small>
+            </div>
+
+            <!-- Opción B: Subir Archivo Local -->
+            <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-upload"></i> Opción B: Subir Archivo de Imagen desde tu Computador</label>
+                <input type="file" 
+                       name="imagen_archivo" 
+                       accept="image/png, image/jpeg, image/jpg, image/webp" 
+                       class="form-control">
+                <small class="form-help-text">Recomendado: 1600x600 px o proporción panorámica.</small>
+            </div>
+
+            {% if banner %}
+                <div class="form-group">
+                    <label class="form-label">Imagen Actual:</label>
+                    <div>
+                        <img src="{{ banner.imagen_url|img_url(banner.origen) }}" 
+                             alt="Banner actual" 
+                             style="max-width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--admin-border);">
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-actions-bar">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Banner
+                </button>
+                <a href="{{ url_for('admin.banners_list') }}" class="btn btn-secondary btn-lg">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

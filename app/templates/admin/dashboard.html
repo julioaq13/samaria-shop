@@ -1,0 +1,150 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Dashboard de Productos - SAMARIA{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    
+    <!-- Encabezado de Página -->
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">Gestión de Calzado y Catálogo</h1>
+            <p class="page-subtitle">Administra los productos, activa/desactiva disponibilidad, gestiona imágenes y banners.</p>
+        </div>
+        <div class="dashboard-actions">
+            <a href="{{ url_for('admin.banners_list') }}" class="btn btn-secondary btn-lg" style="margin-right:10px;">
+                <i class="fa-solid fa-images"></i> Administrar Banners
+            </a>
+            <a href="{{ url_for('admin.product_new') }}" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-plus"></i> Crear Nuevo Producto
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas Resumen -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon icon-total"><i class="fa-solid fa-shoe-prints"></i></div>
+            <div class="stat-data">
+                <span class="stat-number">{{ stats.total_productos }}</span>
+                <span class="stat-label">Total Calzado</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-active"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-data">
+                <span class="stat-number">{{ stats.productos_activos }}</span>
+                <span class="stat-label">Productos Activos</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-promo"><i class="fa-solid fa-tag"></i></div>
+            <div class="stat-data">
+                <span class="stat-number">{{ stats.productos_promocion }}</span>
+                <span class="stat-label">En Promoción</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e0e7ff; color:#4338ca;"><i class="fa-solid fa-panorama"></i></div>
+            <div class="stat-data">
+                <span class="stat-number">{{ stats.total_banners }}</span>
+                <span class="stat-label">Banners</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Productos -->
+    <div class="admin-card">
+        <div class="card-header-bar">
+            <h2 class="card-title">Listado de Calzado en Catálogo</h2>
+            <div class="table-search">
+                <input type="text" id="adminTableSearch" placeholder="Filtrar por nombre o marca..." class="form-control form-control-sm">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Foto</th>
+                        <th>Nombre del Producto</th>
+                        <th>Marca</th>
+                        <th>Precio</th>
+                        <th>Categorías</th>
+                        <th>Origen Foto</th>
+                        <th>Estado</th>
+                        <th style="width: 220px;" class="text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in products %}
+                        <tr class="product-row">
+                            <td class="td-img">
+                                <img src="{{ prod.imagen_principal|img_url(prod.imagen_origen) }}" 
+                                     alt="{{ prod.nombre }}" 
+                                     class="table-thumb">
+                            </td>
+                            <td class="td-name">
+                                <strong>{{ prod.nombre }}</strong>
+                            </td>
+                            <td class="td-brand">
+                                <span class="brand-pill">{{ prod.marca }}</span>
+                            </td>
+                            <td class="td-price">
+                                <strong>{{ prod.precio|currency }}</strong>
+                            </td>
+                            <td class="td-categories">
+                                {% for cat in prod.categorias %}
+                                    <span class="badge-cat badge-cat-{{ cat.slug }}">{{ cat.nombre }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if prod.imagen_origen == 'drive' %}
+                                    <span class="badge-cat" style="background:#fef3c7; color:#92400e;"><i class="fa-brands fa-google-drive"></i> Drive</span>
+                                {% else %}
+                                    <span class="badge-cat" style="background:#f3f4f6; color:#4b5563;"><i class="fa-solid fa-folder"></i> Local</span>
+                                {% endif %}
+                            </td>
+                            <td class="td-status">
+                                <form action="{{ url_for('admin.product_toggle', product_id=prod.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="status-toggle-btn {% if prod.disponible == 1 %}status-active{% else %}status-inactive{% endif %}" title="Clic para alternar disponibilidad">
+                                        {% if prod.disponible == 1 %}
+                                            <i class="fa-solid fa-toggle-on"></i> Activo
+                                        {% else %}
+                                            <i class="fa-solid fa-toggle-off"></i> Inactivo
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="td-actions text-right">
+                                <a href="{{ url_for('admin.product_edit', product_id=prod.id) }}" class="btn-action btn-edit" title="Editar producto">
+                                    <i class="fa-solid fa-pen-to-square"></i> Editar
+                                </a>
+                                <form action="{{ url_for('admin.product_delete', product_id=prod.id) }}" 
+                                      method="POST" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('¿Está seguro de que desea eliminar el producto \'{{ prod.nombre }}\'? Esta acción no se puede deshacer.');">
+                                    <button type="submit" class="btn-action btn-delete" title="Eliminar producto">
+                                        <i class="fa-solid fa-trash-can"></i> Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <p class="text-muted">No hay productos creados aún.</p>
+                                <a href="{{ url_for('admin.product_new') }}" class="btn btn-primary mt-2">Crear el primer producto</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

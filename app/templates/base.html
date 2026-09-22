@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SAMARIA - Tienda de Calzado{% endblock %}</title>
+    <meta name="description" content="SAMARIA - Catálogo exclusivo de calzado para hombre, mujer, novedades y promociones.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Barra de Promoción Superior -->
+    <div class="top-promo-bar" id="topPromoBar">
+        <p>LLEVA +10% OFF EN EL SEGUNDO PAR DE MENOR VALOR | <a href="#">COMPRAR AQUÍ <i class="fa-solid fa-arrow-right"></i></a></p>
+        <button class="close-promo" aria-label="Cerrar promoción"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Encabezado Principal Blanco -->
+    <header class="site-header">
+        <div class="header-container">
+            
+            <!-- Navegación Izquierda -->
+            <nav class="main-navigation" id="mainNavigation">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="{{ url_for('public.category_view', slug='hombre') }}" 
+                           class="nav-link {% if current_category == 'hombre' %}active{% endif %}">
+                           HOMBRE
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('public.category_view', slug='mujer') }}" 
+                           class="nav-link {% if current_category == 'mujer' %}active{% endif %}">
+                           MUJER
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('public.category_view', slug='nuevo') }}" 
+                           class="nav-link {% if current_category == 'nuevo' %}active{% endif %}">
+                           NUEVAS COLECCIONES
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('public.category_view', slug='promo') }}" 
+                           class="nav-link nav-link-promo {% if current_category == 'promo' %}active{% endif %}">
+                           SALE
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logo Central -->
+            <a href="{{ url_for('public.index') }}" class="brand-logo">
+                <!-- Usando texto negro para que resalte en el fondo blanco -->
+                <span class="logo-text">SAMARIA</span>
+                <!-- Si prefieres imagen, usa esta línea en su lugar (asegúrate de que el logo sea oscuro):
+                <img src="{{ url_for('static', filename='img/logo-dark.png') }}" alt="SAMARIA Calzado" class="logo-img"> -->
+            </a>
+
+            <!-- Iconos Derecha -->
+            <div class="header-icons">
+                <a href="#" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i></a>
+                <a href="#" aria-label="Favoritos"><i class="fa-regular fa-bookmark"></i></a>
+                <a href="#" aria-label="Usuario"><i class="fa-regular fa-user"></i></a>
+                <a href="#" aria-label="Carrito"><i class="fa-solid fa-bag-shopping"></i></a>
+            </div>
+
+            <!-- Botón Hamburguesa Móvil -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Abrir menú de navegación">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        
+        <!-- Carrusel Principal: Solo visible en la página de inicio (index) -->
+        {% if request.endpoint == 'public.index' %}
+        <section class="hero-carousel">
+            <div class="carousel-track">
+                <!-- Imagen 1 -->
+                <div class="carousel-slide active" style="background-image: url('{{ url_for('static', filename='img/banner1.jpg') }}');"></div>
+                <!-- Imagen 2 -->
+                <div class="carousel-slide" style="background-image: url('{{ url_for('static', filename='img/banner2.jpg') }}');"></div>
+                <!-- Imagen 3 -->
+                <div class="carousel-slide" style="background-image: url('{{ url_for('static', filename='img/banner3.jpg') }}');"></div>
+            </div>
+            <!-- Botones de control -->
+            <button class="carousel-btn prev-btn" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="carousel-btn next-btn" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+        </section>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer Elegante -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3 class="footer-title">SAMARIA</h3>
+                <p class="footer-tagline">Elegancia, calidad y confort en calzado exclusivo para cada momento.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Navegación</h4>
+                <ul>
+                    <li><a href="{{ url_for('public.category_view', slug='nuevo') }}">Nuevo</a></li>
+                    <li><a href="{{ url_for('public.index') }}">Catálogo Completo</a></li>
+                    <li><a href="{{ url_for('public.category_view', slug='hombre') }}">Hombre</a></li>
+                    <li><a href="{{ url_for('public.category_view', slug='mujer') }}">Mujer</a></li>
+                    <li><a href="{{ url_for('public.category_view', slug='promo') }}">Promociones</a></li>
+                </ul>
+            </div>
+            <div class="footer-admin-link">
+                <h4>Acceso</h4>
+                <a href="{{ url_for('admin.dashboard') }}" class="admin-access-btn">
+                    <i class="fa-solid fa-lock"></i> Panel Administrativo
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SAMARIA. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

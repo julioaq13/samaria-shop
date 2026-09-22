@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel de Administración - SAMARIA{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="admin-body">
+
+    <!-- Navbar Superior del Administrador -->
+    <header class="admin-navbar">
+        <div class="admin-navbar-container">
+            <div class="admin-brand">
+                <a href="{{ url_for('admin.dashboard') }}" class="admin-logo-link">
+                    <span class="admin-logo-badge">SAMARIA</span>
+                    <span class="admin-logo-text">Panel de Control</span>
+                </a>
+            </div>
+
+            <nav class="admin-nav-links">
+                <a href="{{ url_for('public.index') }}" target="_blank" class="nav-btn-link" title="Ver Tienda Pública">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Catálogo Público
+                </a>
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-btn-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-shoe-prints"></i> Productos
+                </a>
+                <a href="{{ url_for('admin.banners_list') }}" class="nav-btn-link {% if 'banner' in request.endpoint %}active{% endif %}">
+                    <i class="fa-solid fa-images"></i> Banners
+                </a>
+                <a href="{{ url_for('admin.product_new') }}" class="nav-btn-link nav-btn-primary">
+                    <i class="fa-solid fa-plus"></i> Nuevo Calzado
+                </a>
+            </nav>
+
+            <div class="admin-user-menu">
+                <div class="user-pill">
+                    <i class="fa-regular fa-user-circle"></i>
+                    <span>{{ session.get('user_nombre', 'Administrador') }}</span>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn" title="Cerrar sesión">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal Admin -->
+    <div class="admin-main-wrapper">
+        <main class="admin-content-area">
+            
+            <!-- Mensajes Flash / Notificaciones -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages-container">
+                        {% for category, message in messages %}
+                            <div class="flash-alert flash-{{ category }}">
+                                <span class="flash-icon">
+                                    {% if category == 'success' %}
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    {% elif category == 'danger' %}
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                    {% elif category == 'warning' %}
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    {% endif %}
+                                </span>
+                                <span class="flash-text">{{ message }}</span>
+                                <button type="button" class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

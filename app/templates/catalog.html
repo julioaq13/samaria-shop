@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if current_category_data %}{{ current_category_data.nombre }} - SAMARIA{% else %}Catálogo Exclusivo - SAMARIA{% endif %}
+{% endblock %}
+
+{% block content %}
+
+    <!-- 1. Carrusel de Banners Rotativo Automático -->
+    <section class="hero-carousel-section" id="heroCarouselSection">
+        <div class="hero-carousel-container" id="heroCarousel">
+            {% if banners and banners|length > 0 %}
+                {% for b in banners %}
+                    <div class="hero-slide {% if loop.first %}active{% endif %}" 
+                         data-index="{{ loop.index0 }}"
+                         style="background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.75) 0%, rgba(20, 20, 20, 0.65) 100%), url('{{ b.imagen_url|img_url(b.origen) }}');">
+                        <div class="hero-content">
+                            <span class="hero-tag">SAMARIA COLECCIÓN</span>
+                            <h1 class="hero-title">{{ b.titulo }}</h1>
+                            {% if b.subtitulo %}
+                                <p class="hero-subtitle">{{ b.subtitulo }}</p>
+                            {% endif %}
+                            <div class="hero-actions">
+                                <a href="{{ b.enlace_url or '#catalogo-seccion' }}" class="btn btn-hero">
+                                    {{ b.texto_boton or 'Explorar Colección' }} <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="hero-slide active" 
+                     data-index="0"
+                     style="background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(20, 20, 20, 0.7) 100%), url('{{ url_for('static', filename='img/banner.jpg') }}');">
+                    <div class="hero-content">
+                        <span class="hero-tag">SAMARIA COLECCIÓN</span>
+                        <h1 class="hero-title">CALZADO CON ESTILO & CONFORT</h1>
+                        <p class="hero-subtitle">Descubre las últimas tendencias en calzado exclusivo para Hombre y Mujer.</p>
+                        <div class="hero-actions">
+                            <a href="#catalogo-seccion" class="btn btn-hero">
+                                Explorar Colección <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if banners and banners|length > 1 %}
+            <!-- Controles de Flechas -->
+            <button class="carousel-arrow prev" id="carouselPrevBtn" aria-label="Banner Anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="carousel-arrow next" id="carouselNextBtn" aria-label="Banner Siguiente">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <!-- Puntos Indicadores -->
+            <div class="carousel-dots" id="carouselDots">
+                {% for b in banners %}
+                    <button class="dot {% if loop.first %}active{% endif %}" data-slide="{{ loop.index0 }}" aria-label="Ir a diapositiva {{ loop.index }}"></button>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- 2. Barra de Búsqueda y Título de Catálogo -->
+    <div class="container" id="catalogo-seccion">
+        <div class="catalog-header-bar">
+            
+            <div class="catalog-title-wrap">
+                <h2 class="section-title">{{ page_title }}</h2>
+                <span class="products-count">{{ products|length }} modelos disponibles</span>
+            </div>
+
+            <!-- Buscador en Tiempo Real -->
+            <form action="{{ request.path }}" method="GET" class="search-box-form" id="searchForm">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" 
+                           name="q" 
+                           id="searchInput"
+                           value="{{ search_query }}" 
+                           placeholder="Buscar por nombre, marca (Nike, Puma...)..." 
+                           class="search-input"
+                           autocomplete="off">
+                    {% if search_query %}
+                        <a href="{{ request.path }}" class="search-clear-btn" title="Limpiar búsqueda">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-search">Buscar</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- 3. Grid de Calzado / Catálogo -->
+    <main class="container main-catalog-container">
+        {% if products %}
+            <div class="products-grid">
+                {% for p in products %}
+                    <article class="product-card" data-id="{{ p.id }}">
+                        
+                        <!-- Imagen del Calzado -->
+                        <div class="card-image-wrap">
+                            <img src="{{ p.imagen_principal|img_url(p.imagen_origen) }}" 
+                                 alt="{{ p.nombre }}" 
+                                 loading="lazy" 
+                                 class="card-img">
+                            
+                            <!-- Badges de Categorías / Oferta -->
+                            <div class="card-badges">
+                                {% for cat in p.categorias %}
+                                    {% if cat.slug == 'promo' %}
+                                        <span class="badge badge-promo">OFERTA</span>
+                                    {% elif cat.slug == 'nuevo' %}
+                                        <span class="badge badge-nuevo">NUEVO</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            <!-- Estado de Disponibilidad -->
+                            {% if p.disponible == 1 %}
+                                <span class="badge-stock in-stock"><i class="fa-solid fa-check"></i> Disponible</span>
+                            {% else %}
+                                <span class="badge-stock out-stock"><i class="fa-solid fa-ban"></i> Agotado</span>
+                            {% endif %}
+
+                            <!-- Botón Flotante Ver Rápido -->
+                            <div class="card-quick-view">
+                                <span><i class="fa-regular fa-eye"></i> Ver Detalles</span>
+                            </div>
+                        </div>
+
+                        <!-- Información del Calzado -->
+                        <div class="card-info">
+                            <span class="card-brand">{{ p.marca }}</span>
+                            <h3 class="card-title">{{ p.nombre }}</h3>
+                            
+                            <div class="card-categories-tags">
+                                {% for cat in p.categorias %}
+                                    <span class="cat-tag">{{ cat.nombre }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="card-price">{{ p.precio|currency }}</div>
+                                <button type="button" class="btn-card-action open-detail-modal" data-id="{{ p.id }}">
+                                    Ver Más
+                                </button>
+                            </div>
+                        </div>
+
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Estado Vacío -->
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fa-solid fa-shoe-prints"></i></div>
+                <h3>No se encontraron productos</h3>
+                <p>
+                    {% if search_query %}
+                        No encontramos coincidencias para "<strong>{{ search_query }}</strong>". Intenta con otro término de búsqueda.
+                    {% else %}
+                        No hay productos disponibles en esta sección en este momento.
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('public.index') }}" class="btn btn-primary mt-3">Ver Todos los Productos</a>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- Modal Interactivo de Detalle de Calzado -->
+    <div class="modal-overlay" id="productDetailModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <button class="modal-close-btn" id="modalCloseBtn" aria-label="Cerrar ventana">&times;</button>
+            <div class="modal-content-body" id="modalContentBody">
+                <div class="modal-loader">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Cargando información del calzado...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
